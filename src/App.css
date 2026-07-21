@@ -59,7 +59,7 @@ body{
 }
 
 .card{
-    width:450px;
+    width:min(450px,100%);
     background:#111827;
     border:2px solid #1e3a5f;
     border-radius:20px;
@@ -74,14 +74,41 @@ body{
     box-shadow:0 20px 40px rgba(0,0,0,.55);
 }
 
+.attempts{
+
+display:inline-block;
+
+margin-top:12px;
+
+padding:8px 16px;
+
+border-radius:30px;
+
+background:#162033;
+
+color:#60a5fa;
+
+font-size:13px;
+
+font-weight:600;
+
+border:1px solid #1e3a5f;
+
+}
+
 .icon{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:90px;
-    margin:15px 0 25px;
-    color:#facc15;
-    animation:float 2s ease-in-out infinite;
+
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:90px;
+margin:15px 0 25px;
+color:#facc15;
+
+animation:
+pop .35s ease,
+float 2s ease-in-out infinite;
+
 }
 
 .gift{
@@ -124,6 +151,17 @@ button:active{
     transform:scale(.98);
 }
 
+button:disabled{
+    background:#1d4ed8;
+    opacity:.7;
+    cursor:not-allowed;
+    transform:none;
+}
+
+button:disabled:hover{
+    background:#1d4ed8;
+    transform:none;
+}
 .footer{
     margin-top:25px;
     padding-top:20px;
@@ -186,6 +224,19 @@ button:active{
     }
 }
 
+@keyframes pop{
+
+0%{
+opacity:0;
+transform:scale(.75);
+}
+
+100%{
+opacity:1;
+transform:scale(1);
+}
+
+}
 @media(max-width:480px){
 
     .card{

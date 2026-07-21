@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 import {
@@ -9,9 +9,9 @@ import {
   FaMobileAlt,
   FaCode,
 } from "react-icons/fa";
+
 import { FaLinkedin } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
-
 import { MdWatch } from "react-icons/md";
 
 function App() {
@@ -93,147 +93,201 @@ function App() {
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
   const [prize, setPrize] = useState(null);
-    function handleBox() {
-    if (loading) return;
+  const [attemptsLeft, setAttemptsLeft] = useState(4);
 
-    if (opened) {
-      setOpened(false);
-      return;
+  useEffect(() => {
+    const savedData = JSON.parse(localStorage.getItem("mystery-box"));
+
+    const today = new Date().toDateString();
+
+    if (!savedData || savedData.date !== today) {
+      const data = {
+        date: today,
+        attempts: 4,
+      };
+
+      localStorage.setItem("mystery-box", JSON.stringify(data));
+      setAttemptsLeft(4);
+    } else {
+      setAttemptsLeft(savedData.attempts);
     }
+  }, []);
+  function handleBox() {
 
-    setLoading(true);
+  if (loading) return;
 
-    setTimeout(() => {
-      let randomPrize;
-
-      do{
-          randomPrize =prizes[Math.floor(Math.random()*prizes.length)];
-        }
-      while(prize && randomPrize.name===prize.name);
-
-      setPrize(randomPrize);
-
-      setLoading(false);
-
-      setOpened(true);
-    }, 1500);
+  if (opened) {
+    setOpened(false);
+    setPrize(null);
+    return;
   }
 
-  return (
-    <div className="container">
+  if (attemptsLeft <= 0) {
+    return;
+  }
 
-      <div className="header">
+  setLoading(true);
 
-        <span className="title-badge">
-          Amazing Lucky Draw
-        </span>
+  setTimeout(() => {
 
-        <h1>Welcome to Mystery Box</h1>
+    let randomPrize;
 
-        <p>
-          Open the box and discover a random premium prize.
-        </p>
+    do {
+      randomPrize =
+        prizes[Math.floor(Math.random() * prizes.length)];
+    } while (
+      prize &&
+      randomPrize.name === prize.name
+    );
 
-        <small>
-          {prizes.length} Premium Prizes Available
-        </small>
+    const remainingAttempts = attemptsLeft - 1;
 
-      </div>
+    setPrize(randomPrize);
+    setOpened(true);
+    setLoading(false);
+    setAttemptsLeft(remainingAttempts);
 
-      <div
-        className="card"
-        style={{
-          borderColor:
-            opened && prize
-              ? prize.color
-              : "#3B82F6",
-        }}
-      >
+    localStorage.setItem(
+      "mystery-box",
+      JSON.stringify({
+        date: new Date().toDateString(),
+        attempts: remainingAttempts,
+      })
+    );
 
-        {loading ? (
-          <>
+  }, 1500);
+}
+return (
+  <div className="container">
 
-            <div className="icon gift">
-              <FaGift />
-            </div>
+    <div className="header">
 
-            <h1>Opening Box...</h1>
+      <span className="title-badge">
+        Amazing Lucky Draw
+      </span>
 
-            <p className="message">
-              Please wait while your prize is being selected.
-            </p>
+      <h1>Welcome to Mystery Box</h1>
 
-          </>
-                    ) : opened ? (
-          <>
+      <p>
+        Open the box and discover a random premium prize.
+      </p>
 
-            <div
-              className="icon"
-              style={{
-                color: prize.color,
-              }}
-            >
-              {prize.icon}
-            </div>
+      <small>
+        {prizes.length} Premium Prizes Available
+      </small>
 
-            <h1>{prize.name}</h1>
-
-            <p className="message">
-              {prize.description}
-            </p>
-
-          </>
-        ) : (
-          <>
-
-            <div className="icon gift">
-              <FaGift />
-            </div>
-
-            <h1>Mystery Box</h1>
-
-            <p className="message">
-              Click the button below to reveal a random prize.
-            </p>
-
-          </>
-        )}
-
-        <button onClick={handleBox}>
-          {opened ? "Close Box" : "Open Box"}
-        </button>
-        <footer className="footer">
-          <span>
-             <FaCode /> Developed by <strong>Mohanad Mohamed</strong>
-          </span>
-
-         <div className="socials">
-
-    <a
-      href="https://www.linkedin.com/in/mohanad-mohamed-017146379"
-      target="_blank"
-      rel="noopener noreferrer"
-      title="LinkedIn"
-    >
-      <FaLinkedin />
-    </a>
-
-    <a
-      href="https://github.com/mohanadmohamed24136-web"
-      target="_blank"
-      rel="noopener noreferrer"
-      title="GitHub"
-    >
-      <FaGithub />
-    </a>
-
-  </div>
-</footer>
-
-      </div>
+      <small className="attempts">
+        Remaining Attempts: {attemptsLeft} of 4
+      </small>
 
     </div>
-  );
+
+    <div
+      className="card"
+      style={{
+        borderColor:
+          opened && prize
+            ? prize.color
+            : "#3B82F6",
+      }}
+    >
+
+      {loading ? (
+        <>
+          <div className="icon gift">
+            <FaGift />
+          </div>
+
+          <h1>Opening Box...</h1>
+
+          <p className="message">
+            Please wait while your prize is being selected.
+          </p>
+        </>
+      ) : opened ? (
+        <>
+          <div
+            className="icon"
+            style={{
+              color: prize.color,
+            }}
+          >
+            {prize.icon}
+          </div>
+
+          <h1>{prize.name}</h1>
+
+          <p className="message">
+            {prize.description}
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="icon gift">
+            <FaGift />
+          </div>
+
+          <h1>Mystery Box</h1>
+
+          <p className="message">
+            Click the button below to reveal a random prize.
+          </p>
+        </>
+      )}
+
+      {attemptsLeft === 0 && !opened && (
+        <p className="limit-message">
+          Daily limit reached. Come back tomorrow!
+        </p>
+      )}
+
+      <button
+        onClick={handleBox}
+        disabled={loading || (!opened && attemptsLeft === 0)}
+      >
+        {loading
+          ? "Opening..."
+          : opened
+          ? "Close Box"
+          : attemptsLeft === 0
+          ? "No Attempts Left"
+          : "Open Box"}
+      </button>
+
+      <footer className="footer">
+
+        <span>
+          <FaCode /> Developed by <strong>Mohanad Mohamed</strong>
+        </span>
+
+        <div className="socials">
+
+          <a
+            href="https://www.linkedin.com/in/mohanad-mohamed-017146379"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="LinkedIn"
+          >
+            <FaLinkedin />
+          </a>
+
+          <a
+            href="https://github.com/mohanadmohamed24136-web"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="GitHub"
+          >
+            <FaGithub />
+          </a>
+
+        </div>
+
+      </footer>
+
+    </div>
+
+  </div>
+);
 }
 
 export default App;
